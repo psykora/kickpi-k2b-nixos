@@ -1,0 +1,11 @@
+result
+result-emmc
+result-kernel
+*.img
+*.img.zst
+
+# private board identity / deploy settings — never commit
+configuration-local.nix
+
+# stale intermediate patch versions (superseded by maxio-mae0621a-phy-driver-v6.18.patch)
+patches/drv-net-phy-add-maxio*

@@ -1,0 +1,36 @@
+# Builds the SD and eMMC images on a native arm64 GitHub runner.
+# nixpkgs is pinned via flake.lock; update it with `nix flake update`
+# (new revs can rename kernel symbols — check the config still builds).
+#
+# NOTE: all repo files must be git-tracked (`git add .`) — flakes ignore
+# untracked files.
+name: build-images
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install nix (flakes enabled)
+        uses: DeterminateSystems/nix-installer-action@v16
+
+      - name: Build SD image
+        run: nix build .#sd-image -o result
+
+      - name: Build eMMC image (reuses the kernel)
+        run: nix build .#emmc-image -o result-emmc
+
+      - name: Upload images
+        uses: actions/upload-artifact@v4
+        with:
+          name: kickpi-k2b-images
+          path: |
+            result/sd-image/*.img.zst
+            result-emmc/sd-image/*.img.zst
+          if-no-files-found: error
